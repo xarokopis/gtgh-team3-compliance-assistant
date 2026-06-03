@@ -1,0 +1,13 @@
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parents[2]
+
+DATA_DIR = BASE_DIR / "data"
+
+RAW_DIR = DATA_DIR / "raw" / "eurlex"
+METADATA_DIR = DATA_DIR / "metadata"
+
+RAW_DIR.mkdir(parents=True, exist_ok=True)
+METADATA_DIR.mkdir(parents=True, exist_ok=True)
+
+METADATA_FILE = METADATA_DIR / "documents.json"
