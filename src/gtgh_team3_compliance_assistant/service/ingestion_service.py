@@ -5,7 +5,7 @@ from gtgh_team3_compliance_assistant.ingestion.eurlex_client import EurLexClient
 from gtgh_team3_compliance_assistant.ingestion.downloader import Downloader
 from gtgh_team3_compliance_assistant.ingestion.metadata_storing import MetadataStore
 from gtgh_team3_compliance_assistant.processing.text_extractor import TextExtractor
-from gtgh_team3_compliance_assistant.processing.chunker import TextChunker
+from gtgh_team3_compliance_assistant.processing.eur_chunker import EurChunker
 from gtgh_team3_compliance_assistant.processing.chunk_storing import ChunkStore
 
 
@@ -15,7 +15,7 @@ class IngestionService:
         self.client = EurLexClient()
         self.downloader = Downloader()
         self.extractor = TextExtractor()
-        self.chunker = TextChunker()
+        self.chunker = EurChunker()
         self.chunk_store = ChunkStore()
 
     async def ingest_eurlex(self):
