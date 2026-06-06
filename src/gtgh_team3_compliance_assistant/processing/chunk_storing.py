@@ -1,13 +1,28 @@
 import json
-from src.gtgh_team3_compliance_assistant.config import DATA_DIR
+from datetime import datetime, timezone
+
+from gtgh_team3_compliance_assistant.config import DATA_DIR
+
+
 CHUNK_DIR = DATA_DIR / "chunks"
 CHUNK_DIR.mkdir(parents=True, exist_ok=True)
+
+
 class ChunkStore:
-    def save(self, document_id, chunks):
+    def save(
+        self,
+        document_id: str,
+        chunks: list[dict],
+        source_pdf: str | None = None,
+        law_passed_date: str | None = None,
+    ):
         file_path = CHUNK_DIR / f"{document_id}.json"
 
         payload = {
             "document_id": document_id,
+            "source_pdf": source_pdf,
+            "law_passed_date": law_passed_date,
+            "ingested_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
             "chunk_count": len(chunks),
             "chunks": [],
         }
@@ -17,12 +32,15 @@ class ChunkStore:
 
             payload["chunks"].append(
                 {
+                    "chunk_uid": self._build_uid(document_id, chunk, idx),
                     "chunk_id": idx,
                     "type": chunk.get("type"),
-                    "article": chunk.get("article"),
                     "article_number": chunk.get("article_number"),
-                    "recital_number": chunk.get("recital_number"),
+                    "annex_number": chunk.get("annex_number"),
                     "title": chunk.get("title"),
+                    "part_index": chunk.get("part_index", 0),
+                    "part_count": chunk.get("part_count", 1),
+                    "page": chunk.get("page"),
                     "text": chunk_text,
                     "char_length": len(chunk_text),
                 }
@@ -34,3 +52,15 @@ class ChunkStore:
         )
 
         return file_path
+
+    def _build_uid(self, document_id: str, chunk: dict, idx: int) -> str:
+        chunk_type = chunk.get("type")
+        part_index = chunk.get("part_index", 0)
+
+        if chunk_type == "article" and chunk.get("article_number"):
+            return f"{document_id}_art_{chunk['article_number']}_p_{part_index}"
+
+        if chunk_type == "annex" and chunk.get("annex_number"):
+            return f"{document_id}_ann_{chunk['annex_number']}_p_{part_index}"
+
+        return f"{document_id}_chunk_{idx}"

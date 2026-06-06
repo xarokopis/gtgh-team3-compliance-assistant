@@ -19,3 +19,7 @@ RAW_DIR.mkdir(parents=True, exist_ok=True)
 METADATA_DIR.mkdir(parents=True, exist_ok=True)
 
 METADATA_FILE = METADATA_DIR / "documents.json"
+
+EMBEDDING_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
+
+STORAGE_PERSIST_PATH = BASE_DIR / "db"

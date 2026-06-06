@@ -1,4 +1,4 @@
-from src.gtgh_team3_compliance_assistant.config import EXTRACTED_DIR
+from gtgh_team3_compliance_assistant.config import EXTRACTED_DIR
 
 class ExtractedTextStore:
 
