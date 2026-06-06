@@ -9,6 +9,12 @@ DATA_DIR_PDF = BASE_DIR / "data" / "pdf"
 RAW_DIR = DATA_DIR / "raw" / "eurlex"
 METADATA_DIR = DATA_DIR / "metadata"
 
+EXTRACTED_DIR = DATA_DIR / "extracted"
+
+EXTRACTED_DIR.mkdir(
+    parents=True,
+    exist_ok=True
+)
 
 RAW_DIR.mkdir(parents=True, exist_ok=True)
 METADATA_DIR.mkdir(parents=True, exist_ok=True)

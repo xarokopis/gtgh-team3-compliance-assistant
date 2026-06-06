@@ -2,8 +2,7 @@ import hashlib
 from pathlib import Path
 import httpx
 from requests import get as get_req
-
-from gtgh_team3_compliance_assistant.config import RAW_DIR, DATA_DIR_PDF
+from src.gtgh_team3_compliance_assistant.config import RAW_DIR, DATA_DIR_PDF
 
 """
 Download a file from EUR-Lex using a CELEX number
@@ -47,7 +46,6 @@ class Downloader:
         file_path = Path(self.out_dir) / f"{celex_id}_{language}.pdf"
         file_path.write_bytes(response.content)
         return file_path;
-
 
 # TODO: delete
 if __name__ == "__main__":

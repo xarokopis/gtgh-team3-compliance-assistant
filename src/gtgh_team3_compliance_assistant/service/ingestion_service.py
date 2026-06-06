@@ -1,13 +1,12 @@
 from datetime import datetime
 from uuid import uuid4
 
-from gtgh_team3_compliance_assistant.ingestion.eurlex_client import EurLexClient
-from gtgh_team3_compliance_assistant.ingestion.downloader import Downloader
-from gtgh_team3_compliance_assistant.ingestion.metadata_storing import MetadataStore
-from gtgh_team3_compliance_assistant.processing.text_extractor import TextExtractor
-from gtgh_team3_compliance_assistant.processing.eur_chunker import EurChunker
-from gtgh_team3_compliance_assistant.processing.chunk_storing import ChunkStore
-
+from src.gtgh_team3_compliance_assistant.ingestion.eurlex_client import EurLexClient
+from src.gtgh_team3_compliance_assistant.ingestion.downloader import Downloader
+from src.gtgh_team3_compliance_assistant.ingestion.metadata_storing import MetadataStore
+from src.gtgh_team3_compliance_assistant.processing.text_extractor import TextExtractor
+from src.gtgh_team3_compliance_assistant.processing.eur_chunker import EurChunker
+from src.gtgh_team3_compliance_assistant.processing.chunk_storing import ChunkStore
 
 class IngestionService:
     def __init__(self):
@@ -50,5 +49,4 @@ class IngestionService:
             self.store.add(record)
             count += 1
             
-
         return count
