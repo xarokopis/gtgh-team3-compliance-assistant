@@ -1,6 +1,5 @@
 import json
-from gtgh_team3_compliance_assistant.config import METADATA_FILE
-
+from src.gtgh_team3_compliance_assistant.config import METADATA_FILE, METADATA_DIR
 
 class MetadataStore:
     def __init__(self):

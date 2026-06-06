@@ -1,14 +1,17 @@
-from pypdf import PdfReader
+from pathlib import Path
+import fitz
 
 class TextExtractor:
     def extract(self, file_path: str) -> str:
-        reader = PdfReader(file_path)
+        document = fitz.open(file_path)
 
-        text = []
+        text_parts = []
 
-        for page in reader.pages:
-            page_text = page.extract_text()
-            if page_text:
-                text.append(page_text)
+        try:
+            for page in document:
+                text_parts.append(page.get_text("text"))
 
-        return "\n".join(text)
+        finally:
+            document.close()
+
+        return "\n".join(text_parts)
