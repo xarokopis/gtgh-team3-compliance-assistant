@@ -1,5 +1,6 @@
 from pathlib import Path
 
+# DIRS
 BASE_DIR = Path(__file__).resolve().parents[2]
 
 DATA_DIR = BASE_DIR / "data"
@@ -19,3 +20,9 @@ RAW_DIR.mkdir(parents=True, exist_ok=True)
 METADATA_DIR.mkdir(parents=True, exist_ok=True)
 
 METADATA_FILE = METADATA_DIR / "documents.json"
+
+# Embedding
+EMBEDDING_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
+
+# Storage
+STORAGE_PERSIST_PATH = BASE_DIR / "db"
