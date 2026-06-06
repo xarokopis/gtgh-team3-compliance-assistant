@@ -3,6 +3,7 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parents[2]
 
 DATA_DIR = BASE_DIR / "data"
+DATA_DIR_PDF = BASE_DIR / "data" / "pdf"
 
 RAW_DIR = DATA_DIR / "raw" / "eurlex"
 METADATA_DIR = DATA_DIR / "metadata"
