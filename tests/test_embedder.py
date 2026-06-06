@@ -26,8 +26,8 @@ def test_embed_returns_array(embedder):
   result = embedder.embed("hello world")
   assert isinstance(result, np.ndarray)
 
-SKIP_REAL_TESTS = True
-@pytest.mark.skipif(SKIP_REAL_TESTS, reason="Loads real model, change SKIP_REAL_TESTS to False to run")
+SKIP_INTEGRATION_TESTS = True
+@pytest.mark.skipif(SKIP_INTEGRATION_TESTS, reason="Set SKIP_INTEGRATION_TESTS=1 to run integration tests")
 def test_embed_real_model():
   real_embedded = LocalEmbedder(model_name=EMBEDDING_MODEL_NAME)
   result = real_embedded.embed("hello world")

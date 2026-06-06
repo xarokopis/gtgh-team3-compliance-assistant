@@ -17,3 +17,6 @@ METADATA_FILE = METADATA_DIR / "documents.json"
 
 # Embedding
 EMBEDDING_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
+
+# Storage
+STORAGE_PERSIST_PATH = BASE_DIR / "db"
