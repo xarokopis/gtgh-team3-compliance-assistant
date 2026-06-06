@@ -13,18 +13,29 @@ class ChunkStore:
 
         payload = {
             "document_id": document_id,
+            "chunk_count": len(chunks),
             "chunks": [],
         }
 
         for idx, chunk in enumerate(chunks):
+            chunk_text = chunk["text"]
+
             payload["chunks"].append(
                 {
                     "chunk_id": idx,
+                    "type": chunk.get("type"),
                     "article": chunk.get("article"),
-                    "text": chunk["text"],
+                    "article_number": chunk.get("article_number"),
+                    "recital_number": chunk.get("recital_number"),
+                    "title": chunk.get("title"),
+                    "text": chunk_text,
+                    "char_length": len(chunk_text),
                 }
             )
 
         file_path.write_text(
-            json.dumps(payload, indent=2)
+            json.dumps(payload, indent=2, ensure_ascii=False),
+            encoding="utf-8",
         )
+
+        return file_path
