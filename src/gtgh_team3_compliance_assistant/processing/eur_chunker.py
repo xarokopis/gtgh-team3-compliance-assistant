@@ -1,153 +1,72 @@
 import re
 
+
 class EurChunker:
-    BODY_START_PATTERN = (
-    r"\b(?:HAS|HAVE|HA\s*VE)\s+ADOPTED\s+THIS\s+"
-    r"(?:REGULATION|REGUL\s*A\s*TION|DIRECTIVE|DECISION)\s*:?"
-    )
-
-    WHEREAS_PATTERN = r"\bWhereas\s*:"
-
-    RECITAL_PATTERN = r"(?m)^\s*\((\d+)\)\s+"
-
     ARTICLE_PATTERN = r"(?m)^\s*Article\s+(\d+[A-Za-z]?)\s*$"
 
     def chunk(self, text: str):
-        text = text.strip()
+        text = self._clean_text(text)
 
         if not text:
             return []
 
-        preamble_text, body_text = self._split_body(text)
-
-        chunks = []
-
-        if preamble_text:
-            chunks.extend(self._chunk_recitals(preamble_text))
-
-        article_chunks = self._chunk_articles(body_text)
+        article_chunks = self._chunk_articles(text, overlap=50)
 
         if article_chunks:
-            chunks.extend(article_chunks)
-            return chunks
+            return article_chunks
 
         return self._fallback_chunk(text)
 
-    def _split_body(self, text: str):
-        match = re.search(
-            self.BODY_START_PATTERN,
-            text,
-            flags=re.IGNORECASE,
-        )
+    def _clean_text(self, text: str):
+        text = text.replace("\u00ad", "")  # soft hyphen
+        text = text.replace("￾", "")       # weird PDF extraction character
+        text = re.sub(r"[ \t]+", " ", text)
+        text = re.sub(r"\n{3,}", "\n\n", text)
+        return text.strip()
 
-        if not match:
-            return "", text
+    def _normalize_chunk_text(self, text: str):
+        text = re.sub(r"\s+", " ", text)
+        return text.strip()
 
-        preamble_text = text[: match.start()].strip()
-        body_text = text[match.end() :].strip()
-
-        return preamble_text, body_text
-
-    def _chunk_recitals(self, preamble_text: str):
-        whereas_match = re.search(
-            self.WHEREAS_PATTERN,
-            preamble_text,
-            flags=re.IGNORECASE,
-        )
-
-        if not whereas_match:
-            return [
-                {
-                    "type": "document_intro",
-                    "article": None,
-                    "article_number": None,
-                    "recital_number": None,
-                    "title": None,
-                    "text": preamble_text,
-                }
-            ]
-
-        intro_text = preamble_text[: whereas_match.start()].strip()
-        recitals_text = preamble_text[whereas_match.end() :].strip()
-
-        chunks = []
-
-        if intro_text:
-            chunks.append(
-                {
-                    "type": "document_intro",
-                    "article": None,
-                    "article_number": None,
-                    "recital_number": None,
-                    "title": None,
-                    "text": intro_text,
-                }
-            )
-
-        recital_matches = self._find_recital_matches(recitals_text)
-
-        for i, match in enumerate(recital_matches):
-            start = match.start()
-
-            if i + 1 < len(recital_matches):
-                end = recital_matches[i + 1].start()
-            else:
-                end = len(recitals_text)
-
-            recital_number = match.group(1)
-            recital_text = recitals_text[start:end].strip()
-
-            chunks.append(
-                {
-                    "type": "recital",
-                    "article": None,
-                    "article_number": None,
-                    "recital_number": recital_number,
-                    "title": None,
-                    "text": recital_text,
-                }
-            )
-
-        return chunks
-
-    def _find_recital_matches(self, recitals_text: str):
-        all_matches = list(re.finditer(self.RECITAL_PATTERN, recitals_text))
-
-        recital_matches = []
-        expected_number = 1
-
-        for match in all_matches:
-            number = int(match.group(1))
-
-            if number == expected_number:
-                recital_matches.append(match)
-                expected_number += 1
-
-        return recital_matches
-
-    def _chunk_articles(self, body_text: str):
-        matches = list(
+    def _chunk_articles(self, text: str, overlap: int = 50):
+        article_matches = list(
             re.finditer(
                 self.ARTICLE_PATTERN,
-                body_text,
+                text,
                 flags=re.IGNORECASE,
             )
         )
 
-        if not matches:
+        if not article_matches:
             return []
 
         chunks = []
-        
-        def chunk(self, text: str):
-            if i + 1 < len(matches):
-                end = matches[i + 1].start()
+
+        for i, match in enumerate(article_matches):
+            original_start = match.start()
+
+            if i + 1 < len(article_matches):
+                original_end = article_matches[i + 1].start()
             else:
-                end = len(body_text)
+                original_end = len(text)
+
+            # Article 1 has no previous article.
+            # Every other article starts 50 characters before its heading.
+            if i == 0:
+                chunk_start = original_start
+            else:
+                chunk_start = max(0, original_start - overlap)
 
             article_number = match.group(1)
-            article_text = body_text[start:end].strip()
-            title = self._get_article_title(article_text)
+
+            # Use the clean article only for title detection.
+            # Do NOT use the overlapped text for title detection.
+            article_without_overlap = text[original_start:original_end].strip()
+            title = self._get_article_title(article_without_overlap)
+
+            # Use overlapped text for the actual chunk.
+            chunk_text = text[chunk_start:original_end].strip()
+            chunk_text = self._normalize_chunk_text(chunk_text)
 
             chunks.append(
                 {
@@ -156,7 +75,7 @@ class EurChunker:
                     "article_number": article_number,
                     "recital_number": None,
                     "title": title,
-                    "text": article_text,
+                    "text": chunk_text,
                 }
             )
 
@@ -170,7 +89,10 @@ class EurChunker:
 
         title = lines[1]
 
-        if title.startswith(("1.", "2.", "3.", "4.", "5.")):
+        if re.match(r"^\d+\.", title):
+            return None
+
+        if len(title) > 150:
             return None
 
         return title
@@ -187,6 +109,7 @@ class EurChunker:
         while start < len(text):
             end = start + chunk_size
             chunk_text = text[start:end].strip()
+            chunk_text = self._normalize_chunk_text(chunk_text)
 
             if chunk_text:
                 chunks.append(
@@ -201,5 +124,5 @@ class EurChunker:
                 )
 
             start = end - overlap
-            
+
         return chunks
