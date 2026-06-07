@@ -20,20 +20,24 @@ class ChromaVectorStore(BaseModel):
             path=str(self.persist_path),
             settings=Settings(anonymized_telemetry=False)
         )
-        self.collection = self.client.get_or_create_collection(
+        self.collection = (self.client.get_or_create_collection(
             name=self.collection_name,
-            metadata={"hnsw:space": "cosine"}
+            metadata={"hnsw:space": "cosine"})
         )
 
     def add_chunks(self, input: AddChunksInput) -> None:
-        ids = [chunk.chunk_id for chunk in input.chunks]
+        ids = [f"{chunk.source_file}_{chunk.chunk_id}" for chunk in input.chunks]
         documents = [chunk.text for chunk in input.chunks]
 
         metadatas = [
             { 
                 "source_file": chunk.source_file, 
                 "page_number": chunk.page, 
-                "chunk_index": chunk.chunk_id 
+                "chunk_index": chunk.chunk_id,
+                "type": chunk.type,
+                "article": chunk.article,
+                "article_number": chunk.article_number,
+                "title": chunk.title,
             } 
             for chunk in input.chunks 
         ]
@@ -58,10 +62,9 @@ class ChromaVectorStore(BaseModel):
 
         return [
             SearchResult(
-                chunk_id=ids[i],
+                chunk_id=i,
                 content=documents[i],
                 metadata=metadatas[i],
                 distance=distances[i],
             ) for i in range(len(ids))
         ]
-

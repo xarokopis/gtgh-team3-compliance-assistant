@@ -1,5 +1,5 @@
 import json
-from src.gtgh_team3_compliance_assistant.config import DATA_DIR
+from gtgh_team3_compliance_assistant.config import DATA_DIR
 CHUNK_DIR = DATA_DIR / "chunks"
 CHUNK_DIR.mkdir(parents=True, exist_ok=True)
 class ChunkStore:

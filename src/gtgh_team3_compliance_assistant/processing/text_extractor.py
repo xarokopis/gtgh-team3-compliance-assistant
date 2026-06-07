@@ -1,17 +1,20 @@
-from pathlib import Path
 import fitz
 
 class TextExtractor:
     def extract(self, file_path: str) -> str:
-        document = fitz.open(file_path)
 
-        text_parts = []
+        doc = fitz.open(file_path)
+        pages = []
 
         try:
-            for page in document:
-                text_parts.append(page.get_text("text"))
+            for page in doc:
+                text = page.get_text("text")
 
+                if text:
+                    pages.append(text)
         finally:
-            document.close()
+            doc.close()
 
-        return "\n".join(text_parts)
+        full_text = "\n".join(pages)
+
+        return full_text

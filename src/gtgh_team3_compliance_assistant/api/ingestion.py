@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from gtgh_team3_compliance_assistant.service.ingestion_service import IngestionService
+from gtgh_team3_compliance_assistant.service.local_ingestion_service import IngestionService
 
 router = APIRouter(prefix="/ingestion")
 
