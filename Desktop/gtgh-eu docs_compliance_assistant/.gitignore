@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+.venv/
+
+# Environment
+.env
+
+# Data (downloaded/generated — not committed)
+data/pdfs/
+data/extracted/
+data/chunks/
+!data/pdfs/.gitkeep
+!data/extracted/.gitkeep
+!data/chunks/.gitkeep
+
+# Vector store
+chroma_db/
+
+# OS
+.DS_Store
